@@ -67,7 +67,9 @@ impl Contract {
 
 
   pub fn create_product(&mut self, id: String, name: String, price: String, description: String, img: String, is_active: bool) -> Product {
-    // Get who is calling the method and how much $NEAR they attached
+    
+    assert!( self.products.get(&id.clone()).is_none() == true, "This product is is exists already");
+
     let seller: AccountId = env::predecessor_account_id();
     
     let new_product = Product {
@@ -79,7 +81,7 @@ impl Contract {
       is_active: is_active,
       seller: seller
     };
-    self.products.insert(&new_product.id,&new_product);
+    self.products.insert(&new_product.id.clone(),&new_product);
 
     // add product by seller 
     // create product for the first time
@@ -96,11 +98,32 @@ impl Contract {
   
     new_product
   }
+
+  pub fn update_product(&mut self, id: String, name: String, price: String, description: String, img: String, is_active: bool) -> Product {
+    
+    assert!( self.products.get(&id.clone()).is_some() == true, "Product with this id is not exist");
+    let product: Product = self.products.get(&id.clone()).unwrap();
+    assert!( product.seller == env::predecessor_account_id(), "You are not the product's owner");
+    let updated_product = Product {
+      id: product.id,
+      name: String::from(name),
+      price: price.parse::<u128>().unwrap(),
+      description: String::from(description),
+      img: String::from(img),
+      is_active: is_active,
+      seller: product.seller
+    };
+    self.products.insert(&id.clone(),&updated_product);
+
+    // add product by seller 
+    updated_product
+  }
+
   pub fn get_product(&self, product_id: String) -> Option<Product> {
-    self.products.get(&product_id)
+    self.products.get(&product_id.clone())
   }
   pub fn get_seller_product(&self, seller: AccountId) -> Option<Vec<String>> {
-    self.products_by_sellers.get(&seller)
+    self.products_by_sellers.get(&seller.clone())
   }
   // get list buyers of a product
   pub fn get_buyer_addresses(&self, product_id: String) -> Option<Vec<AccountId>> {

@@ -1,20 +1,24 @@
-near call dev-1663766330741-29124265582221 --accountId niviki.testnet create_product '{"id": "p1", "name": "product 1", "price": "5000000000000000000000000", "description": "this is product","img": "img/product", "is_active": true}'
+near call dev-1663772023083-14858967140899 --accountId niviki.testnet create_product '{"id": "p2", "name": "product 1", "price": "5000000000000000000000000", "description": "this is product","img": "img/product", "is_active": true}'
 
-near call dev-1663766330741-29124265582221 --accountId niviki.testnet get_product '{"product_id": "p2"}'
-near call dev-1663766330741-29124265582221 --accountId stoi.testnet get_product '{"product_id": "p1"}'
+near call dev-1663772023083-14858967140899 --accountId niviki.testnet update_product '{"id": "p2", "name": "product 1 updated", "price": "2000000000000000000000000", "description": "this is product","img": "img/product", "is_active": true}'
 
-
-near call dev-1663766330741-29124265582221 --accountId niviki.testnet get_seller_product '{"seller": "niviki.testnet"}'
-
-near call dev-1663766330741-29124265582221 --accountId stoi.testnet buy_product '{"product_id": "p1"}'
+near call dev-1663772023083-14858967140899 --accountId niviki.testnet get_product '{"product_id": "p2"}'
 
 
+near call dev-1663772023083-14858967140899 --accountId stoi.testnet get_product '{"product_id": "p1"}'
 
 
-near call dev-1663766330741-29124265582221 --accountId niviki.testnet buy_product '{"product_id": "p1"}'
+near call dev-1663772023083-14858967140899 --accountId niviki.testnet get_seller_product '{"seller": "niviki.testnet"}'
+
+near call dev-1663772023083-14858967140899 --accountId stoi.testnet buy_product '{"product_id": "p1"}'
 
 
-near call dev-1663766330741-29124265582221 --accountId niviki.testnet get_buyer_addresses '{"product_id": "1"}'
+
+
+near call dev-1663772023083-14858967140899 --accountId niviki.testnet buy_product '{"product_id": "p1"}'
+
+
+near call dev-1663772023083-14858967140899 --accountId niviki.testnet get_buyer_addresses '{"product_id": "1"}'
 
 
 
