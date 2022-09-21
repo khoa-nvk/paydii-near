@@ -1,0 +1,1 @@
+/Users/stoic/Documents/DATA/Projects/LearnNear/paydii-near/contract/target/wasm32-unknown-unknown/release/contract.wasm: /Users/stoic/Documents/DATA/Projects/LearnNear/paydii-near/contract/src/lib.rs /Users/stoic/Documents/DATA/Projects/LearnNear/paydii-near/contract/src/paydii.rs

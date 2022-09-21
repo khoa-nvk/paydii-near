@@ -1,0 +1,11 @@
+/Users/stoic/Documents/DATA/Projects/LearnNear/donation-rust/contract/target/debug/deps/digest-22d671fa2891af77.rmeta: /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/lib.rs /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api.rs /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api/ct_variable.rs /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api/rt_variable.rs /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api/wrapper.rs /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api/xof_reader.rs /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/digest.rs
+
+/Users/stoic/Documents/DATA/Projects/LearnNear/donation-rust/contract/target/debug/deps/digest-22d671fa2891af77.d: /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/lib.rs /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api.rs /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api/ct_variable.rs /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api/rt_variable.rs /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api/wrapper.rs /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api/xof_reader.rs /Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/digest.rs
+
+/Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/lib.rs:
+/Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api.rs:
+/Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api/ct_variable.rs:
+/Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api/rt_variable.rs:
+/Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api/wrapper.rs:
+/Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/core_api/xof_reader.rs:
+/Users/stoic/.cargo/registry/src/github.com-1ecc6299db9ec823/digest-0.10.5/src/digest.rs:
