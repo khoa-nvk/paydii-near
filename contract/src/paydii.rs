@@ -8,6 +8,7 @@ use near_sdk::serde::Serialize;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, log, near_bindgen, AccountId, Promise, Balance};
 use near_sdk::json_types::U128;
+use near_sdk::json_types::U64;
 
 // pub const STORAGE_COST: u128 = 1_000_000_000_000_000_000_000;
 
@@ -40,6 +41,15 @@ pub struct Coupon {
   discount_amount: u128, 
   allowed_uses: u128, // if allowed_uses = 0 => coupon is invalid
   seller: AccountId 
+}
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Review {
+  product_id: String,
+  reviewer: AccountId, 
+  content: String,
+  star: u64
 }
 
 
@@ -230,6 +240,47 @@ impl Contract {
       updated_coupon
   }
 
+  pub fn add_review(&mut self, product_id: String, content: String, star: U64) -> bool { 
+    assert!( self.products.get(&product_id.clone()).is_some() == true, "Product with this id is not exist");
+    let product: Product = self.products.get(&product_id.clone()).unwrap();
+    assert!( product.seller != env::predecessor_account_id(), "You can't review your own product");
+
+    let new_review = Review {
+      product_id: product.id.clone(),
+      reviewer: env::predecessor_account_id(),
+      star: u64::from(star),
+      content: content
+    };
+
+    let review2 = new_review.clone();
+    
+    // if product has the first review
+    if self.reviews.get(&product_id.clone()).is_none() == true {
+      self.reviews.insert(&product_id.clone(),&vec![new_review.clone()]);
+    }else {
+      let mut current_reviews = self.reviews.get(&product_id.clone()).unwrap();
+      current_reviews.push(new_review);
+      self.reviews.insert(&product.id.clone(),&current_reviews);
+    }  
+
+    // if user has review the first product 
+    if self.my_reviews.get(&env::predecessor_account_id()).is_none() == true {
+      self.my_reviews.insert(&env::predecessor_account_id(),&vec![review2]);
+    }else {
+      let mut current_reviews = self.my_reviews.get(&env::predecessor_account_id()).unwrap();
+      current_reviews.push(review2);
+      self.my_reviews.insert(&env::predecessor_account_id(),&current_reviews);
+    }
+
+    
+
+    true
+  }
+
+  pub fn update_my_review(&mut self, review: &Review) {
+    // if user has review the first product 
+    
+  }
 
   pub fn get_product(&self, product_id: String) -> Option<Product> { 
     self.products.get(&product_id)
@@ -246,6 +297,15 @@ impl Contract {
   pub fn get_seller_coupons(&self, seller: AccountId) -> Option<Vec<CouponKey>> {
     self.coupons_by_seller.get(&seller)
   }
+  // get review list of a product
+  pub fn get_reviews(&self, product_id: String) -> Option<Vec<Review>> {
+    self.reviews.get(&product_id)
+  }
+  // get all review from a user
+  pub fn get_my_reviews(&self, reviewer: AccountId) -> Option<Vec<Review>> {
+    self.my_reviews.get(&reviewer)
+  }
+
   pub fn get_coupon_details(&self, product_id: String, code: String, seller: AccountId) -> Option<Coupon> {
     self.coupons.get(&CouponKey {
       product_id: product_id,
