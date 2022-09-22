@@ -43,12 +43,19 @@ pub struct Coupon {
   seller: AccountId 
 }
 
+enum ETrackingType {
+  ReviewProduct,
+  BuyerProduct,
+}
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
-pub struct ReviewTrackingKey {
+pub struct TrackingKey {
     product_id: String,
-    reviewer: AccountId
-  }
+    reviewer: AccountId,
+    tracking_type: u8 // review_product: 1, buy_product: 2
+}
+
+
 
 #[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone )]
 #[serde(crate = "near_sdk::serde")]
@@ -98,7 +105,17 @@ impl Contract {
     assert!( product.seller != buyer, "You can't buy your own product");
     assert!( product.is_active == true, "Product is in-active");
 
+    if let Some(tracking) = self.tracking.get(&TrackingKey { 
+      product_id: product.id.clone(),
+      reviewer: env::predecessor_account_id(), 
+      tracking_type: 2
+      }) {
+        assert!( tracking == false, "You already bought this product");
+      } 
+
     log!("{} buying product {} ", buyer, product.name);
+
+    
 
     // no coupon 
     if has_coupon == false {
@@ -142,6 +159,8 @@ impl Contract {
       origin_price: product.price, 
       profit_price: purchased_price };
     
+    let product_id_copy = new_purchase_info.product_id.clone();
+    
     // update list of purchased products
     if ( self.buyers.get(&env::predecessor_account_id()).is_none() == true) {
         self.buyers.insert(&env::predecessor_account_id(),&vec![new_purchase_info]);
@@ -160,6 +179,10 @@ impl Contract {
       self.buyer_addresses.insert(&product_id.clone(),&current_buyer_ids);
     }
 
+    self.tracking.insert(&TrackingKey { 
+      product_id: product_id_copy,
+      reviewer: env::predecessor_account_id(), 
+      tracking_type: 2 },&true);
     
     true 
   }
@@ -302,9 +325,10 @@ impl Contract {
       content: content
     };
 
-    if let Some(tracking) = self.review_tracking.get(&ReviewTrackingKey { 
+    if let Some(tracking) = self.tracking.get(&TrackingKey { 
       product_id: product.id.clone(),
-      reviewer: env::predecessor_account_id()
+      reviewer: env::predecessor_account_id(), 
+      tracking_type: 1
       }) {
         assert!( tracking == false, "You already reviewd this product");
       } 
@@ -333,9 +357,10 @@ impl Contract {
     }
 
     // update review tracking of
-    self.review_tracking.insert(&ReviewTrackingKey { 
+    self.tracking.insert(&TrackingKey { 
         product_id: product.id.clone(),
-        reviewer: env::predecessor_account_id()
+        reviewer: env::predecessor_account_id(), 
+        tracking_type: 1
     }, &true);
 
     true
