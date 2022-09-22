@@ -24,6 +24,25 @@ pub struct Product {
   pub seller: AccountId,
 }
 
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct CouponKey {
+    product_id: String,
+    code: String, 
+    seller: AccountId
+  }
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Coupon {
+  code: String,
+  product_id: String,
+  discount_amount: u128, 
+  allowed_uses: u128, // if allowed_uses = 0 => coupon is invalid
+  seller: AccountId 
+}
+
+
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct ProductJson {
@@ -72,7 +91,7 @@ impl Contract {
   }
 
 
-  pub fn create_product(&mut self, id: String, name: String, price: String, description: String, img: String, is_active: bool) -> Product {
+  pub fn create_product(&mut self, id: String, name: String, price: U128, description: String, img: String, is_active: bool) -> Product {
     
     assert!( self.products.get(&id.clone()).is_none() == true, "This product is is exists already");
 
@@ -81,7 +100,8 @@ impl Contract {
     let new_product = Product {
       id: String::from(id),
       name: String::from(name),
-      price: price.parse::<u128>().unwrap(),
+      // price: price.parse::<u128>().unwrap(),
+      price: u128::from(price),
       description: String::from(description),
       img: String::from(img),
       is_active: is_active,
@@ -105,7 +125,7 @@ impl Contract {
     new_product
   }
 
-  pub fn update_product(&mut self, id: String, name: String, price: String, description: String, img: String, is_active: bool) -> Product {
+  pub fn update_product(&mut self, id: String, name: String, price: U128, description: String, img: String, is_active: bool) -> Product {
     
     assert!( self.products.get(&id.clone()).is_some() == true, "Product with this id is not exist");
     let product: Product = self.products.get(&id.clone()).unwrap();
@@ -113,7 +133,7 @@ impl Contract {
     let updated_product = Product {
       id: product.id,
       name: String::from(name),
-      price: price.parse::<u128>().unwrap(),
+      price: u128::from(price),
       description: String::from(description),
       img: String::from(img),
       is_active: is_active,
@@ -125,10 +145,66 @@ impl Contract {
     updated_product
   }
 
-  pub fn get_product_raw(&self, product_id: String) -> Option<Product> { 
+  pub fn create_coupon(&mut self, product_id: String, code: String, allowed_uses: U128, discount_amount: U128) -> Coupon { 
+    assert!( self.products.get(&product_id.clone()).is_some() == true, "Product with this id is not exist");
+    let product: Product = self.products.get(&product_id.clone()).unwrap();
+    assert!( product.seller == env::predecessor_account_id(), "You are not the product's owner");
+
+  //   let new_coupon_key : coupon_key = {
+  //     product_id = product_id,
+  //     code = code,
+  //     seller = current_product.seller }
+  // require(( Map.lookup(new_coupon_key,state.coupons) == None) , "This coupon for this product is already exist")
+  // let new_coupon = {
+  //     code = code,
+  //     product_id = product_id,
+  //     discount_amount = discount_amount, 
+  //     allowed_uses = allowed_uses,
+  //     seller = Call.caller }
+  // put(state{coupons[new_coupon_key] = new_coupon})
+
+      // let new_coupon_key = CouponKey {
+      //   product_id: product_id,
+      //   code: code,
+      //   seller: product.seller,
+      // };
+      // TODO: require here 
+      let new_coupon = Coupon {
+        product_id: product_id,
+        code: code,
+        discount_amount: u128::from(discount_amount),
+        allowed_uses: u128::from(allowed_uses), 
+        seller: product.seller
+      };
+      self.coupons.insert(&CouponKey {
+        product_id: new_coupon.product_id.clone(),
+        code: new_coupon.code.clone(),
+        seller: new_coupon.seller.clone(),
+      }, &new_coupon);
+      
+      new_coupon
+  }
+
+  pub fn get_product(&self, product_id: String) -> Option<Product> { 
     self.products.get(&product_id)
   }
-  pub fn get_product(&self, product_id: String) -> ProductJson {
+
+  pub fn get_seller_product(&self, seller: AccountId) -> Option<Vec<String>> {
+    self.products_by_sellers.get(&seller.clone())
+  }
+  // get list buyers of a product
+  pub fn get_buyer_addresses(&self, product_id: String) -> Option<Vec<AccountId>> {
+    self.buyer_addresses.get(&product_id.clone())
+  }
+  pub fn get_coupon_details(&self, product_id: String, code: String, seller: AccountId) -> Option<Coupon> {
+    self.coupons.get(&CouponKey {
+      product_id: product_id,
+      code: code,
+      seller: seller,
+    })
+  }
+
+  pub fn get_product_json(&self, product_id: String) -> ProductJson {
 
     let product_data : Option<Product> = 
         if let Some(product_data) = self.products.get(&product_id) {
@@ -159,13 +235,7 @@ impl Contract {
     }
     
   }
-  pub fn get_seller_product(&self, seller: AccountId) -> Option<Vec<String>> {
-    self.products_by_sellers.get(&seller.clone())
-  }
-  // get list buyers of a product
-  pub fn get_buyer_addresses(&self, product_id: String) -> Option<Vec<AccountId>> {
-    self.buyer_addresses.get(&product_id.clone())
-  }
+  
 
  
 }
