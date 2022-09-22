@@ -9,7 +9,7 @@ mod paydii;
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
   // pub beneficiary: AccountId,
-  pub donations: UnorderedMap<AccountId, u128>,
+  pub product_list: Vec<String>,
   pub products: UnorderedMap<String, Product>, // all products
   pub products_by_sellers: UnorderedMap<AccountId, Vec<String>>, // products created by one seller
   pub buyer_addresses: UnorderedMap<String, Vec<AccountId>>, // one product is purchased by many buyers
@@ -41,7 +41,7 @@ impl Default for Contract {
   fn default() -> Self {
     Self{
       // beneficiary: "v1.faucet.nonofficial.testnet".parse().unwrap(),
-      donations: UnorderedMap::new(b"d"),
+      product_list: vec![],
       products: UnorderedMap::new(StorageKey::Product),
       products_by_sellers: UnorderedMap::new(StorageKey::ProductBySeller),
       buyer_addresses: UnorderedMap::new(StorageKey::BuyerAddresses),
@@ -62,7 +62,7 @@ impl Contract {
     assert!(!env::state_exists(), "Already initialized");
     Self {
       // beneficiary,
-      donations: UnorderedMap::new(b"d"),
+      product_list: vec![],
       products: UnorderedMap::new(StorageKey::Product),
       products_by_sellers: UnorderedMap::new(StorageKey::ProductBySeller),
       buyer_addresses: UnorderedMap::new(StorageKey::BuyerAddresses),

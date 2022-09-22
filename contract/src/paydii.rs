@@ -137,6 +137,7 @@ impl Contract {
       current_product_ids.push(new_product.id.clone());
       self.products_by_sellers.insert(&env::predecessor_account_id(),&current_product_ids);
     }
+    self.product_list.push(new_product.id.clone());
   
     new_product
   }
@@ -297,9 +298,9 @@ impl Contract {
     true
   }
 
-  pub fn update_my_review(&mut self, review: &Review) {
-    // if user has review the first product 
-    
+  
+  pub fn get_all_products(&self) -> Vec<String> {
+    self.product_list.clone()
   }
 
   pub fn get_product(&self, product_id: String) -> Option<Product> { 

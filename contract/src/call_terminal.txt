@@ -1,43 +1,43 @@
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet create_product '{"id": "p2", "name": "product 1", "price": "5000000000000000000000000", "description": "this is product","img": "img/product", "is_active": true}'
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet create_product '{"id": "p1", "name": "product 1", "price": "5000000000000000000000000", "description": "this is product","img": "img/product", "is_active": true}'
 
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet update_product '{"id": "p2", "name": "product 2 updated", "price": "2000000000000000000000000", "description": "this is product","img": "img/product", "is_active": true}'
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet update_product '{"id": "p2", "name": "product 2 updated", "price": "2000000000000000000000000", "description": "this is product","img": "img/product", "is_active": true}'
 
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet create_coupon '{"product_id": "p1", "code": "OFF", "allowed_uses": "10000", "discount_amount": "100000000000"}'
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet create_coupon '{"product_id": "p1", "code": "OFF2", "allowed_uses": "10000", "discount_amount": "100000000000"}'
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet create_coupon '{"product_id": "p1", "code": "OFF", "allowed_uses": "10000", "discount_amount": "100000000000"}'
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet create_coupon '{"product_id": "p1", "code": "OFF2", "allowed_uses": "10000", "discount_amount": "100000000000"}'
 
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet update_coupon '{"product_id": "p1", "code": "OFF", "allowed_uses": "69", "discount_amount": "6900000000000"}'
-
-
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet get_product '{"product_id": "p1"}'
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet update_coupon '{"product_id": "p1", "code": "OFF", "allowed_uses": "69", "discount_amount": "6900000000000"}'
 
 
-near call dev-1663856867055-93590174164469 --accountId stoi.testnet get_product '{"product_id": "p2"}'
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet get_product '{"product_id": "p1"}'
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet get_all_products
+
+near call dev-1663857827109-66422102810296 --accountId stoi.testnet get_product '{"product_id": "p2"}'
+near call dev-1663857827109-66422102810296 --accountId stoi.testnet create_product '{"id": "pp1", "name": "product 1", "price": "5000000000000000000000000", "description": "this is product","img": "img/product", "is_active": true}'
+
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet get_coupon_details '{"product_id": "p1", "code": "OFF", "seller": "niviki.testnet"}'
 
 
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet get_coupon_details '{"product_id": "p1", "code": "OFF", "seller": "niviki.testnet"}'
 
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet get_seller_product '{"seller": "niviki.testnet"}'
 
-
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet get_seller_product '{"seller": "niviki.testnet"}'
-
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet get_seller_coupons '{"seller": "niviki.testnet"}'
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet get_seller_coupons '{"seller": "niviki.testnet"}'
 
 // buy product
-near call dev-1663856867055-93590174164469 --accountId stoi.testnet buy_product '{"product_id": "p2"}'
-near call dev-1663856867055-93590174164469 --accountId stoi.testnet add_review '{"product_id": "p2", "content": "pretty good", "star" : "5"}'
+near call dev-1663857827109-66422102810296 --accountId stoi.testnet buy_product '{"product_id": "p2"}'
+near call dev-1663857827109-66422102810296 --accountId stoi.testnet add_review '{"product_id": "p2", "content": "pretty good", "star" : "5"}'
 
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet add_review '{"product_id": "p1", "content": "pretty good", "star" : "5"}'
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet add_review '{"product_id": "p1", "content": "pretty good", "star" : "5"}'
 
     
-near call dev-1663856867055-93590174164469 --accountId stoi.testnet get_product_raw '{"product_id": "p3"}'
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet buy_product '{"product_id": "p1"}'
+near call dev-1663857827109-66422102810296 --accountId stoi.testnet get_product_raw '{"product_id": "p3"}'
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet buy_product '{"product_id": "p1"}'
 
 
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet get_buyer_addresses '{"product_id": "p3"}'
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet get_buyer_addresses '{"product_id": "p3"}'
 
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet get_reviews '{"product_id": "p1"}'
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet get_reviews '{"product_id": "p1"}'
 
-near call dev-1663856867055-93590174164469 --accountId niviki.testnet get_my_reviews '{"reviewer": "stoi.testnet"}'
+near call dev-1663857827109-66422102810296 --accountId niviki.testnet get_my_reviews '{"reviewer": "stoi.testnet"}'
 
 
 
