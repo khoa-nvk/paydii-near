@@ -1,4 +1,4 @@
-use paydii::{Product, CouponKey, Coupon, Review};
+use paydii::{Product, CouponKey, Coupon, Review, ReviewTrackingKey};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, near_bindgen, AccountId, BorshStorageKey};
 use near_sdk::collections::{UnorderedMap};
@@ -16,8 +16,8 @@ pub struct Contract {
   pub coupons: UnorderedMap<CouponKey, Coupon>,
   pub coupons_by_seller: UnorderedMap<AccountId, Vec<CouponKey>>, // one seller can create many products
   pub reviews: UnorderedMap<String,Vec<Review>>, // one product has many reviews 
-  pub my_reviews: UnorderedMap<AccountId,Vec<Review>> // one user reviews many product
-
+  pub my_reviews: UnorderedMap<AccountId,Vec<Review>>, // one user reviews many product
+  pub review_tracking: UnorderedMap<ReviewTrackingKey, bool>, //
 }
 
 #[derive(BorshStorageKey, BorshSerialize)]
@@ -29,7 +29,7 @@ pub enum StorageKey {
     CouponsBySeller,
     Reviews,
     MyReviews,
-    MarketV2,
+    ReviewTracking,
     MarketV3,
     OffersV2,
     ParasNFTContractIdsV2,
@@ -48,7 +48,8 @@ impl Default for Contract {
       coupons: UnorderedMap::new(StorageKey::Coupons),
       coupons_by_seller: UnorderedMap::new(StorageKey::CouponsBySeller),
       reviews: UnorderedMap::new(StorageKey::Reviews),
-      my_reviews: UnorderedMap::new(StorageKey::MyReviews)
+      my_reviews: UnorderedMap::new(StorageKey::MyReviews),
+      review_tracking: UnorderedMap::new(StorageKey::ReviewTracking),
     }
   }
 }
@@ -68,7 +69,8 @@ impl Contract {
       coupons: UnorderedMap::new(StorageKey::Coupons),
       coupons_by_seller: UnorderedMap::new(StorageKey::CouponsBySeller),
       reviews: UnorderedMap::new(StorageKey::Reviews),
-      my_reviews: UnorderedMap::new(StorageKey::MyReviews)
+      my_reviews: UnorderedMap::new(StorageKey::MyReviews),
+      review_tracking: UnorderedMap::new(StorageKey::ReviewTracking),
     }
   }
 

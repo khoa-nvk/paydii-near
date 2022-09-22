@@ -43,7 +43,14 @@ pub struct Coupon {
   seller: AccountId 
 }
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct ReviewTrackingKey {
+    product_id: String,
+    reviewer: AccountId
+  }
+
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone )]
 #[serde(crate = "near_sdk::serde")]
 pub struct Review {
   product_id: String,
@@ -58,7 +65,6 @@ pub struct Review {
 pub struct ProductJson {
   id: String,
   name: String,
-  
   description: String, 
   img: String, 
   is_active: bool,
@@ -252,8 +258,16 @@ impl Contract {
       content: content
     };
 
-    let review2 = new_review.clone();
+    if let Some(tracking) = self.review_tracking.get(&ReviewTrackingKey { 
+      product_id: product.id.clone(),
+      reviewer: env::predecessor_account_id()
+      }) {
+        assert!( tracking == false, "You already reviewd this product");
+      } 
+
     
+    let review_copy = new_review.clone();
+
     // if product has the first review
     if self.reviews.get(&product_id.clone()).is_none() == true {
       self.reviews.insert(&product_id.clone(),&vec![new_review.clone()]);
@@ -263,16 +277,22 @@ impl Contract {
       self.reviews.insert(&product.id.clone(),&current_reviews);
     }  
 
+    
+
     // if user has review the first product 
     if self.my_reviews.get(&env::predecessor_account_id()).is_none() == true {
-      self.my_reviews.insert(&env::predecessor_account_id(),&vec![review2]);
+      self.my_reviews.insert(&env::predecessor_account_id(),&vec![review_copy]);
     }else {
       let mut current_reviews = self.my_reviews.get(&env::predecessor_account_id()).unwrap();
-      current_reviews.push(review2);
+      current_reviews.push(review_copy);
       self.my_reviews.insert(&env::predecessor_account_id(),&current_reviews);
     }
 
-    
+    // update review tracking of
+    self.review_tracking.insert(&ReviewTrackingKey { 
+        product_id: product.id.clone(),
+        reviewer: env::predecessor_account_id()
+    }, &true);
 
     true
   }
