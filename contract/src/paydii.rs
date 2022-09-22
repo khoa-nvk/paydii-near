@@ -188,6 +188,49 @@ impl Contract {
       new_coupon
   }
 
+  pub fn update_coupon(&mut self, product_id: String, code: String, allowed_uses: U128, discount_amount: U128) -> Coupon { 
+    assert!( self.products.get(&product_id.clone()).is_some() == true, "Product with this id is not exist");
+    
+    let product: Product = self.products.get(&product_id.clone()).unwrap();
+
+    assert!( product.seller == env::predecessor_account_id(), "You are not the product's owner");
+
+    assert!( self.coupons.get(&CouponKey {
+      product_id: product_id.clone(),
+      code: code.clone(),
+      seller: product.seller.clone(),
+    }).is_some() == true, "This coupon for this product is already exist");
+
+
+    // assert!( self.coupons.get(&CouponKey {
+    //   product_id: product_id.clone(),
+    //   code: code.clone(),
+    //   seller: product.seller.clone(),
+    // }).is_some() == true, "Coupon is not exist");
+
+    // let current_coupon = self.coupons.get(&CouponKey {
+    //   product_id: product_id.clone(),
+    //   code: code.clone(),
+    //   seller: product.seller.clone(),
+    // }).unwrap();
+
+   
+      let updated_coupon = Coupon {
+        product_id: product_id,
+        code: code,
+        discount_amount: u128::from(discount_amount),
+        allowed_uses: u128::from(allowed_uses), 
+        seller: product.seller
+      };
+      self.coupons.insert(&CouponKey {
+        product_id: updated_coupon.product_id.clone(),
+        code: updated_coupon.code.clone(),
+        seller: updated_coupon.seller.clone(),
+      }, &updated_coupon);
+      updated_coupon
+  }
+
+
   pub fn get_product(&self, product_id: String) -> Option<Product> { 
     self.products.get(&product_id)
   }
