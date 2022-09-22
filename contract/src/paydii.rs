@@ -13,7 +13,7 @@ use near_sdk::json_types::U64;
 // pub const STORAGE_COST: u128 = 1_000_000_000_000_000_000_000;
 
 
-#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Product {
   pub id: String,
@@ -59,6 +59,13 @@ pub struct Review {
   star: u64
 }
 
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize, Clone )]
+#[serde(crate = "near_sdk::serde")]
+pub struct PurchaseInfo {
+  product_id: String,
+  origin_price: u128,
+  profit_price: u128,
+}
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
@@ -77,7 +84,7 @@ impl Contract {
   
 
   #[payable] // Buy the product
-  pub fn buy_product(&mut self, product_id: String) -> bool {
+  pub fn buy_product(&mut self, product_id: String, has_coupon: bool, coupon_code: String) -> bool {
     
     assert!( self.products.get(&product_id).is_some() == true, "Can't find the product with id {}", product_id);
 
@@ -86,11 +93,63 @@ impl Contract {
 
     let product = self.products.get(&product_id).unwrap();
 
+    let mut purchased_price: u128 = product.price.clone();
+
     assert!( product.seller != buyer, "You can't buy your own product");
     assert!( product.is_active == true, "Product is in-active");
 
     log!("{} buying product {} ", buyer, product.name);
+
+    // no coupon 
+    if has_coupon == false {
+        // Buyer sends Near to seller 
+        Promise::new(product.seller).transfer(product.price);
+    }else {
+    // has coupon
+      let current_coupon_key = CouponKey { 
+        product_id: product.id.clone(), 
+        code: coupon_code,
+        seller: product.seller };
+       assert!( self.coupons.get(&current_coupon_key).is_some(), "This coupon is not exist");
+       // get coupon details 
+       let coupon = self.coupons.get(&current_coupon_key).unwrap();
+       assert!( coupon.allowed_uses > 0, "This coupon's allowed uses is 0");
+       // get new price
+       let new_discount_price = product.price - coupon.discount_amount;
+        purchased_price = new_discount_price.clone();
+       
+        let seller = coupon.seller.clone();
+        // coupon's seller and product's seller are the same 
+        Promise::new(seller.clone()).transfer(new_discount_price);
+
+        let updated_coupon = Coupon {
+          code: coupon.code,
+          product_id: coupon.product_id,
+          discount_amount: coupon.discount_amount,
+          allowed_uses: coupon.allowed_uses - 1, 
+          seller: coupon.seller };
+
+        // update coupon 
+        self.coupons.insert(&CouponKey {
+          product_id: updated_coupon.product_id.clone(),
+          code: updated_coupon.code.clone(),
+          seller: seller.clone(),
+        }, &updated_coupon);
+    }
+
+    let new_purchase_info = PurchaseInfo { 
+      product_id: product.id,
+      origin_price: product.price, 
+      profit_price: purchased_price };
     
+    // update list of purchased products
+    if ( self.buyers.get(&env::predecessor_account_id()).is_none() == true) {
+        self.buyers.insert(&env::predecessor_account_id(),&vec![new_purchase_info]);
+    }else {
+      let mut current_purchased_info_list = self.buyers.get(&env::predecessor_account_id()).unwrap();
+      current_purchased_info_list.push(new_purchase_info);
+      self.buyers.insert(&env::predecessor_account_id(), &current_purchased_info_list);
+    } 
     
     // create product for the first time
     if self.buyer_addresses.get(&product_id.clone()) == None {
@@ -101,8 +160,7 @@ impl Contract {
       self.buyer_addresses.insert(&product_id.clone(),&current_buyer_ids);
     }
 
-    // Buyer sends Near to seller 
-    Promise::new(product.seller).transfer(product.price);
+    
     true 
   }
 
@@ -216,22 +274,7 @@ impl Contract {
       product_id: product_id.clone(),
       code: code.clone(),
       seller: product.seller.clone(),
-    }).is_some() == true, "This coupon for this product is already exist");
-
-
-    // assert!( self.coupons.get(&CouponKey {
-    //   product_id: product_id.clone(),
-    //   code: code.clone(),
-    //   seller: product.seller.clone(),
-    // }).is_some() == true, "Coupon is not exist");
-
-    // let current_coupon = self.coupons.get(&CouponKey {
-    //   product_id: product_id.clone(),
-    //   code: code.clone(),
-    //   seller: product.seller.clone(),
-    // }).unwrap();
-
-   
+    }).is_some() == true, "This coupon for this product is already exist");   
       let updated_coupon = Coupon {
         product_id: product_id,
         code: code,
@@ -298,7 +341,12 @@ impl Contract {
     true
   }
 
-  
+  // get all products a buyer has bought so far
+  pub fn get_purchased_products_of_buyer(&self, buyer: AccountId) -> Option<Vec<PurchaseInfo>> {
+      self.buyers.get(&buyer)
+  }
+
+  // get all products in the app   
   pub fn get_all_products(&self) -> Vec<String> {
     self.product_list.clone()
   }

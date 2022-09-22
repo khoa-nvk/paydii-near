@@ -1,4 +1,4 @@
-use paydii::{Product, CouponKey, Coupon, Review, ReviewTrackingKey};
+use paydii::{Product, CouponKey, Coupon, Review, ReviewTrackingKey, PurchaseInfo};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, near_bindgen, AccountId, BorshStorageKey};
 use near_sdk::collections::{UnorderedMap};
@@ -18,6 +18,7 @@ pub struct Contract {
   pub reviews: UnorderedMap<String,Vec<Review>>, // one product has many reviews 
   pub my_reviews: UnorderedMap<AccountId,Vec<Review>>, // one user reviews many product
   pub review_tracking: UnorderedMap<ReviewTrackingKey, bool>, //
+  pub buyers: UnorderedMap<AccountId,Vec<PurchaseInfo>> // one buyers has bought many products 
 }
 
 #[derive(BorshStorageKey, BorshSerialize)]
@@ -30,7 +31,7 @@ pub enum StorageKey {
     Reviews,
     MyReviews,
     ReviewTracking,
-    MarketV3,
+    Buyers,
     OffersV2,
     ParasNFTContractIdsV2,
     Trade,
@@ -50,6 +51,7 @@ impl Default for Contract {
       reviews: UnorderedMap::new(StorageKey::Reviews),
       my_reviews: UnorderedMap::new(StorageKey::MyReviews),
       review_tracking: UnorderedMap::new(StorageKey::ReviewTracking),
+      buyers: UnorderedMap::new(StorageKey::Buyers),
     }
   }
 }
@@ -71,6 +73,7 @@ impl Contract {
       reviews: UnorderedMap::new(StorageKey::Reviews),
       my_reviews: UnorderedMap::new(StorageKey::MyReviews),
       review_tracking: UnorderedMap::new(StorageKey::ReviewTracking),
+      buyers: UnorderedMap::new(StorageKey::Buyers),
     }
   }
 
