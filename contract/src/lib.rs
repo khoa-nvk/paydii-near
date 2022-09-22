@@ -1,6 +1,6 @@
 use paydii::Product;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{env, near_bindgen, AccountId};
+use near_sdk::{env, near_bindgen, AccountId, BorshStorageKey};
 use near_sdk::collections::{UnorderedMap};
 
 mod paydii;
@@ -8,21 +8,38 @@ mod paydii;
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
-  pub beneficiary: AccountId,
+  // pub beneficiary: AccountId,
   pub donations: UnorderedMap<AccountId, u128>,
   pub products: UnorderedMap<String, Product>, // all products
   pub products_by_sellers: UnorderedMap<AccountId, Vec<String>>, // products created by one seller
   pub buyer_addresses: UnorderedMap<String, Vec<AccountId>> // one product is purchased by many buyers
 }
 
+#[derive(BorshStorageKey, BorshSerialize)]
+pub enum StorageKey {
+    Product,
+    ProductBySeller,
+    BuyerAddresses,
+    StorageDeposits,
+    ByOwnerId,
+    Offers,
+    ParasNFTContractIds,
+    MarketV2,
+    MarketV3,
+    OffersV2,
+    ParasNFTContractIdsV2,
+    Trade,
+    MarketDataTransactionFee
+}
+
 impl Default for Contract {
   fn default() -> Self {
     Self{
-      beneficiary: "v1.faucet.nonofficial.testnet".parse().unwrap(),
+      // beneficiary: "v1.faucet.nonofficial.testnet".parse().unwrap(),
       donations: UnorderedMap::new(b"d"),
-      products: UnorderedMap::new(b"f"),
-      products_by_sellers: UnorderedMap::new(b"f"),
-      buyer_addresses: UnorderedMap::new(b"f")
+      products: UnorderedMap::new(StorageKey::Product),
+      products_by_sellers: UnorderedMap::new(StorageKey::ProductBySeller),
+      buyer_addresses: UnorderedMap::new(StorageKey::BuyerAddresses)
     }
   }
 }
@@ -31,10 +48,10 @@ impl Default for Contract {
 impl Contract {
   #[init]
   #[private] // Public - but only callable by env::current_account_id()
-  pub fn init(beneficiary: AccountId) -> Self {
+  pub fn init() -> Self {
     assert!(!env::state_exists(), "Already initialized");
     Self {
-      beneficiary,
+      // beneficiary,
       donations: UnorderedMap::new(b"d"),
       products: UnorderedMap::new(b"f"),
       products_by_sellers: UnorderedMap::new(b"f"),
@@ -42,16 +59,16 @@ impl Contract {
     }
   }
 
-  // Public - beneficiary getter
-  pub fn get_beneficiary(&self) -> AccountId {
-    self.beneficiary.clone()
-  }
+  // // Public - beneficiary getter
+  // pub fn get_beneficiary(&self) -> AccountId {
+  //   self.beneficiary.clone()
+  // }
 
-  // Public - but only callable by env::current_account_id(). Sets the beneficiary
-  #[private]
-  pub fn change_beneficiary(&mut self, beneficiary: AccountId) {
-    self.beneficiary = beneficiary;
-  }
+  // // Public - but only callable by env::current_account_id(). Sets the beneficiary
+  // #[private]
+  // pub fn change_beneficiary(&mut self, beneficiary: AccountId) {
+  //   self.beneficiary = beneficiary;
+  // }
 }
 
 
@@ -66,10 +83,10 @@ mod tests {
   const NEAR: u128 = 1000000000000000000000000;
 
   #[test]
-  fn initializes() {
-      let contract = Contract::init(BENEFICIARY.parse().unwrap());
-      assert_eq!(contract.beneficiary, BENEFICIARY.parse().unwrap())
-  }
+  // fn initializes() {
+  //     let contract = Contract::init(BENEFICIARY.parse().unwrap());
+  //     assert_eq!(contract.beneficiary, BENEFICIARY.parse().unwrap())
+  // }
 
   #[test]
   fn donate() {

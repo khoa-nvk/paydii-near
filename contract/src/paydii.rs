@@ -2,6 +2,7 @@ use crate::Contract;
 use crate::ContractExt;
 
 
+use near_sdk::serde::Deserialize;
 // use near_sdk::env::log;
 use near_sdk::serde::Serialize;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
@@ -10,16 +11,8 @@ use near_sdk::json_types::U128;
 
 // pub const STORAGE_COST: u128 = 1_000_000_000_000_000_000_000;
 
-#[near_bindgen]
-#[derive(BorshDeserialize, BorshSerialize, Serialize)]
-#[serde(crate = "near_sdk::serde")]
-pub struct Donation {
-  pub account_id: AccountId, 
-  pub total_amount: U128,
-}
 
-#[near_bindgen]
-#[derive(BorshDeserialize, BorshSerialize, Serialize)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Product {
   pub id: String,
@@ -29,6 +22,19 @@ pub struct Product {
   pub img: String, 
   pub is_active: bool,
   pub seller: AccountId,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct ProductJson {
+  id: String,
+  name: String,
+  
+  description: String, 
+  img: String, 
+  is_active: bool,
+  // price: U128,
+  seller: AccountId,
 }
 
 #[near_bindgen]
@@ -48,17 +54,17 @@ impl Contract {
     assert!( product.seller != buyer, "You can't buy your own product");
     assert!( product.is_active == true, "Product is in-active");
 
-    // log!("{} buying product {} ", buyer, product.name);
+    log!("{} buying product {} ", buyer, product.name);
     
     
     // create product for the first time
-    // if self.buyer_addresses.get(&product_id.clone()) == None {
-    //   self.buyer_addresses.insert(&product_id.clone(),&vec![env::predecessor_account_id()]);
-    // } else {
-    //   let mut current_buyer_ids = self.buyer_addresses.get(&product_id.clone()).unwrap();
-    //   current_buyer_ids.push(env::predecessor_account_id());
-    //   self.buyer_addresses.insert(&product_id.clone(),&current_buyer_ids);
-    // }
+    if self.buyer_addresses.get(&product_id.clone()) == None {
+      self.buyer_addresses.insert(&product_id.clone(),&vec![env::predecessor_account_id()]);
+    } else {
+      let mut current_buyer_ids = self.buyer_addresses.get(&product_id.clone()).unwrap();
+      current_buyer_ids.push(env::predecessor_account_id());
+      self.buyer_addresses.insert(&product_id.clone(),&current_buyer_ids);
+    }
 
     // Buyer sends Near to seller 
     Promise::new(product.seller).transfer(product.price);
@@ -119,8 +125,39 @@ impl Contract {
     updated_product
   }
 
-  pub fn get_product(&self, product_id: String) -> Option<Product> {
-    self.products.get(&product_id.clone())
+  pub fn get_product_raw(&self, product_id: String) -> Option<Product> { 
+    self.products.get(&product_id)
+  }
+  pub fn get_product(&self, product_id: String) -> ProductJson {
+
+    let product_data : Option<Product> = 
+        if let Some(product_data) = self.products.get(&product_id) {
+            Some( Product {
+              id: product_data.id,
+              name: product_data.name,
+              price: product_data.price,
+              description: product_data.description, 
+              img: product_data.img, 
+              is_active: product_data.is_active,
+              seller: product_data.seller,
+            })
+        } else {
+            None
+        };
+    let product_data = product_data.expect("Product is not exist");
+
+    ProductJson {
+          id: product_data.id,
+          name: product_data.name,
+          description: product_data.description, 
+          img: product_data.img, 
+          is_active: product_data.is_active,
+          seller: product_data.seller
+
+          // price: product_data.price.into(),
+          
+    }
+    
   }
   pub fn get_seller_product(&self, seller: AccountId) -> Option<Vec<String>> {
     self.products_by_sellers.get(&seller.clone())
