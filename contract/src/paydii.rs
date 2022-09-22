@@ -150,25 +150,11 @@ impl Contract {
     let product: Product = self.products.get(&product_id.clone()).unwrap();
     assert!( product.seller == env::predecessor_account_id(), "You are not the product's owner");
 
-  //   let new_coupon_key : coupon_key = {
-  //     product_id = product_id,
-  //     code = code,
-  //     seller = current_product.seller }
-  // require(( Map.lookup(new_coupon_key,state.coupons) == None) , "This coupon for this product is already exist")
-  // let new_coupon = {
-  //     code = code,
-  //     product_id = product_id,
-  //     discount_amount = discount_amount, 
-  //     allowed_uses = allowed_uses,
-  //     seller = Call.caller }
-  // put(state{coupons[new_coupon_key] = new_coupon})
-
-      // let new_coupon_key = CouponKey {
-      //   product_id: product_id,
-      //   code: code,
-      //   seller: product.seller,
-      // };
-      // TODO: require here 
+    assert!( self.coupons.get(&CouponKey {
+      product_id: product_id.clone(),
+      code: code.clone(),
+      seller: product.seller.clone(),
+    }).is_none() == true, "This coupon for this product is already exist");
       let new_coupon = Coupon {
         product_id: product_id,
         code: code,
@@ -182,6 +168,23 @@ impl Contract {
         seller: new_coupon.seller.clone(),
       }, &new_coupon);
       
+      // create coupon for the first time
+      if self.coupons_by_seller.get(&env::predecessor_account_id()).is_none() == true {
+        self.coupons_by_seller.insert(&env::predecessor_account_id(),&vec![CouponKey {
+          product_id: new_coupon.product_id.clone(),
+          code: new_coupon.code.clone(),
+          seller: new_coupon.seller.clone(),
+        }]);
+      } else {
+        let mut current_coupons = self.coupons_by_seller.get(&env::predecessor_account_id()).unwrap();
+        current_coupons.push(CouponKey {
+          product_id: new_coupon.product_id.clone(),
+          code: new_coupon.code.clone(),
+          seller: new_coupon.seller.clone(),
+        });
+        self.coupons_by_seller.insert(&env::predecessor_account_id(), &current_coupons);
+      }
+
       new_coupon
   }
 
@@ -195,6 +198,10 @@ impl Contract {
   // get list buyers of a product
   pub fn get_buyer_addresses(&self, product_id: String) -> Option<Vec<AccountId>> {
     self.buyer_addresses.get(&product_id.clone())
+  }
+  // get list coupons of a seller has created 
+  pub fn get_seller_coupons(&self, seller: AccountId) -> Option<Vec<CouponKey>> {
+    self.coupons_by_seller.get(&seller)
   }
   pub fn get_coupon_details(&self, product_id: String, code: String, seller: AccountId) -> Option<Coupon> {
     self.coupons.get(&CouponKey {

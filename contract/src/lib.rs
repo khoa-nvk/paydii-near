@@ -14,6 +14,7 @@ pub struct Contract {
   pub products_by_sellers: UnorderedMap<AccountId, Vec<String>>, // products created by one seller
   pub buyer_addresses: UnorderedMap<String, Vec<AccountId>>, // one product is purchased by many buyers
   pub coupons: UnorderedMap<CouponKey, Coupon>,
+  pub coupons_by_seller: UnorderedMap<AccountId, Vec<CouponKey>>, // one
 }
 
 #[derive(BorshStorageKey, BorshSerialize)]
@@ -22,7 +23,7 @@ pub enum StorageKey {
     ProductBySeller,
     BuyerAddresses,
     Coupons,
-    ByOwnerId,
+    CouponsBySeller,
     Offers,
     ParasNFTContractIds,
     MarketV2,
@@ -41,7 +42,8 @@ impl Default for Contract {
       products: UnorderedMap::new(StorageKey::Product),
       products_by_sellers: UnorderedMap::new(StorageKey::ProductBySeller),
       buyer_addresses: UnorderedMap::new(StorageKey::BuyerAddresses),
-      coupons: UnorderedMap::new(StorageKey::Coupons)
+      coupons: UnorderedMap::new(StorageKey::Coupons),
+      coupons_by_seller: UnorderedMap::new(StorageKey::CouponsBySeller),
     }
   }
 }
@@ -58,7 +60,8 @@ impl Contract {
       products: UnorderedMap::new(StorageKey::Product),
       products_by_sellers: UnorderedMap::new(StorageKey::ProductBySeller),
       buyer_addresses: UnorderedMap::new(StorageKey::BuyerAddresses),
-      coupons: UnorderedMap::new(StorageKey::Coupons)
+      coupons: UnorderedMap::new(StorageKey::Coupons),
+      coupons_by_seller: UnorderedMap::new(StorageKey::CouponsBySeller),
     }
   }
 
